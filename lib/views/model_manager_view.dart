@@ -10,6 +10,18 @@ class ModelManagerView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final modelsState = ref.watch(modelsProvider);
 
+    ref.listen<ModelsState>(modelsProvider, (prev, next) {
+      if (next.statusMessage != null && next.statusMessage != prev?.statusMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.statusMessage!),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(

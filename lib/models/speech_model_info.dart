@@ -6,7 +6,8 @@ class SpeechModelInfo {
   final String description;
   final SpeechModelType type;
   final int sizeBytes;
-  final String downloadUrl;
+  final String downloadUrl; // For single archive downloads
+  final List<String> fileUrls; // For direct multi-file downloads (no decompression needed)
   final String relativeDirPath;
   final String speedRating; // e.g. "Ultra Fast", "Fast", "Balanced"
   final String accuracyRating; // e.g. "Good", "High", "Very High"
@@ -21,7 +22,8 @@ class SpeechModelInfo {
     required this.description,
     required this.type,
     required this.sizeBytes,
-    required this.downloadUrl,
+    this.downloadUrl = '',
+    this.fileUrls = const [],
     required this.relativeDirPath,
     required this.speedRating,
     required this.accuracyRating,
@@ -44,6 +46,7 @@ class SpeechModelInfo {
     SpeechModelType? type,
     int? sizeBytes,
     String? downloadUrl,
+    List<String>? fileUrls,
     String? relativeDirPath,
     String? speedRating,
     String? accuracyRating,
@@ -59,6 +62,7 @@ class SpeechModelInfo {
       type: type ?? this.type,
       sizeBytes: sizeBytes ?? this.sizeBytes,
       downloadUrl: downloadUrl ?? this.downloadUrl,
+      fileUrls: fileUrls ?? this.fileUrls,
       relativeDirPath: relativeDirPath ?? this.relativeDirPath,
       speedRating: speedRating ?? this.speedRating,
       accuracyRating: accuracyRating ?? this.accuracyRating,
@@ -72,14 +76,18 @@ class SpeechModelInfo {
 
 /// Catalog of tested, production-ready on-device speech models
 final List<SpeechModelInfo> defaultModelCatalog = [
-  // STT Models (Whisper ONNX via sherpa-onnx)
+  // STT Models (Direct fast CDN from Hugging Face - zero decompression delay)
   SpeechModelInfo(
     id: 'stt_whisper_tiny_en',
     name: 'Whisper Tiny (English)',
     description: 'Ultra-fast, lowest battery and RAM usage. Best for quick notes and older phones.',
     type: SpeechModelType.stt,
-    sizeBytes: 39 * 1024 * 1024,
-    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.en.tar.bz2',
+    sizeBytes: 40 * 1024 * 1024,
+    fileUrls: [
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny.en/resolve/main/tiny.en-encoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny.en/resolve/main/tiny.en-decoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny.en/resolve/main/tiny.en-tokens.txt',
+    ],
     relativeDirPath: 'stt_whisper_tiny_en',
     speedRating: '⚡ Ultra Fast (0.2x)',
     accuracyRating: 'Good',
@@ -91,7 +99,11 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     description: 'Higher accuracy with enhanced punctuation. Recommended for clear, detailed notes.',
     type: SpeechModelType.stt,
     sizeBytes: 74 * 1024 * 1024,
-    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-base.en.tar.bz2',
+    fileUrls: [
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-base.en/resolve/main/base.en-encoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-base.en/resolve/main/base.en-decoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-base.en/resolve/main/base.en-tokens.txt',
+    ],
     relativeDirPath: 'stt_whisper_base_en',
     speedRating: '🚀 Fast (0.4x)',
     accuracyRating: 'High',
@@ -102,19 +114,26 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     description: 'Supports 99+ languages including Spanish, French, German, Hindi, Chinese, and more.',
     type: SpeechModelType.stt,
     sizeBytes: 75 * 1024 * 1024,
-    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2',
+    fileUrls: [
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny/resolve/main/tiny-encoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny/resolve/main/tiny-decoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny/resolve/main/tiny-tokens.txt',
+    ],
     relativeDirPath: 'stt_whisper_tiny_multi',
     speedRating: '⚡ Ultra Fast',
     accuracyRating: 'Good',
   ),
-
   SpeechModelInfo(
     id: 'stt_whisper_small_en',
     name: 'Whisper Small (English)',
     description: 'High accuracy with advanced nuance and punctuation. Recommended for clear, detailed notes.',
     type: SpeechModelType.stt,
-    sizeBytes: 150 * 1024 * 1024,
-    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.en.tar.bz2',
+    sizeBytes: 374 * 1024 * 1024,
+    fileUrls: [
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small.en/resolve/main/small.en-encoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small.en/resolve/main/small.en-decoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small.en/resolve/main/small.en-tokens.txt',
+    ],
     relativeDirPath: 'stt_whisper_small_en',
     speedRating: '🚀 Balanced (0.6x)',
     accuracyRating: 'Very High',
@@ -124,8 +143,12 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     name: 'Whisper Small (Multilingual)',
     description: 'Very high accuracy across 99+ languages with strong multilingual understanding.',
     type: SpeechModelType.stt,
-    sizeBytes: 244 * 1024 * 1024,
-    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.tar.bz2',
+    sizeBytes: 375 * 1024 * 1024,
+    fileUrls: [
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small/resolve/main/small-encoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small/resolve/main/small-decoder.int8.onnx',
+      'https://huggingface.co/csukuangfj/sherpa-onnx-whisper-small/resolve/main/small-tokens.txt',
+    ],
     relativeDirPath: 'stt_whisper_small_multi',
     speedRating: '🚀 Balanced',
     accuracyRating: 'Very High',
@@ -138,7 +161,6 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     description: 'Uses your phone’s built-in offline speech engine (Google Speech / Apple Voice). No download required.',
     type: SpeechModelType.tts,
     sizeBytes: 0,
-    downloadUrl: '',
     relativeDirPath: '',
     speedRating: '⚡ Instant',
     accuracyRating: 'Standard',
