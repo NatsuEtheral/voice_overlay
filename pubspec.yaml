@@ -31,7 +31,7 @@ dependencies:
   archive: ^3.6.1
 
   # High Refresh Rate (120Hz) Support on Android
-  flutter_displaymode: ^0.6.0
+  flutter_displaymode: ^0.7.0
 
   # UI & Animations
   intl: ^0.19.0
