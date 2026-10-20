@@ -63,6 +63,8 @@ class TtsService {
 
   Future<bool> initNeuralModel(SpeechModelInfo model) async {
     try {
+      await sherpa.initBindingsAsync();
+
       if (_loadedTtsModelId == model.id && _sherpaTts != null) {
         return true;
       }

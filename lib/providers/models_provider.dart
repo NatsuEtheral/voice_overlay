@@ -64,20 +64,27 @@ class ModelsNotifier extends StateNotifier<ModelsState> {
 
     for (final model in defaultModelCatalog) {
       final downloaded = await ModelDownloaderService.instance.isModelDownloaded(model);
-      final isSelected = model.isSelected && downloaded;
 
-      if (model.type == SpeechModelType.stt && (isSelected || defaultStt == null && downloaded)) {
+      if (model.type == SpeechModelType.stt && defaultStt == null && downloaded) {
         defaultStt = model.id;
       }
-      if (model.type == SpeechModelType.tts && (isSelected || defaultTts == null && downloaded)) {
+      if (model.type == SpeechModelType.tts && defaultTts == null && downloaded) {
         defaultTts = model.id;
       }
 
-      updatedModels.add(model.copyWith(isDownloaded: downloaded, isSelected: isSelected));
+      updatedModels.add(model.copyWith(isDownloaded: downloaded));
     }
 
+    final finalModels = updatedModels.map((m) {
+      if (m.type == SpeechModelType.stt) {
+        return m.copyWith(isSelected: m.id == defaultStt);
+      } else {
+        return m.copyWith(isSelected: m.id == defaultTts);
+      }
+    }).toList();
+
     state = state.copyWith(
-      models: updatedModels,
+      models: finalModels,
       activeSttModelId: defaultStt,
       activeTtsModelId: defaultTts ?? 'tts_system_native',
       isLoading: false,
@@ -136,10 +143,22 @@ class ModelsNotifier extends StateNotifier<ModelsState> {
     if (!model.isDownloaded && !model.isDefaultBuiltIn) return;
 
     if (model.type == SpeechModelType.stt) {
-      state = state.copyWith(activeSttModelId: model.id);
+      final updated = state.models.map((m) {
+        if (m.type == SpeechModelType.stt) {
+          return m.copyWith(isSelected: m.id == modelId);
+        }
+        return m;
+      }).toList();
+      state = state.copyWith(models: updated, activeSttModelId: model.id);
       await SttService.instance.initModel(model);
     } else {
-      state = state.copyWith(activeTtsModelId: model.id);
+      final updated = state.models.map((m) {
+        if (m.type == SpeechModelType.tts) {
+          return m.copyWith(isSelected: m.id == modelId);
+        }
+        return m;
+      }).toList();
+      state = state.copyWith(models: updated, activeTtsModelId: model.id);
       await TtsService.instance.initNeuralModel(model);
     }
   }

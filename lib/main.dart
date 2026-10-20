@@ -4,10 +4,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 import 'views/home_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize sherpa-onnx native bindings for offline STT/TTS
+  try {
+    await sherpa.initBindingsAsync();
+  } catch (e) {
+    debugPrint('Failed to initialize sherpa-onnx bindings: $e');
+  }
 
   // Enable 120Hz High Refresh Rate on supported Android devices
   if (Platform.isAndroid) {

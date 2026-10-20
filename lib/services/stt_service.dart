@@ -17,6 +17,9 @@ class SttService {
 
   Future<bool> initModel(SpeechModelInfo model) async {
     try {
+      // Ensure sherpa-onnx native bindings are initialized
+      await sherpa.initBindingsAsync();
+
       if (_loadedModelId == model.id && _recognizer != null) {
         return true;
       }
@@ -45,9 +48,13 @@ class SttService {
         final name = p.basename(path).toLowerCase();
 
         if (name.contains('encoder') && name.endsWith('.onnx')) {
-          encoderPath = path;
+          if (encoderPath == null || (name.contains('int8') && !encoderPath.contains('int8'))) {
+            encoderPath = path;
+          }
         } else if (name.contains('decoder') && name.endsWith('.onnx')) {
-          decoderPath = path;
+          if (decoderPath == null || (name.contains('int8') && !decoderPath.contains('int8'))) {
+            decoderPath = path;
+          }
         } else if (name.contains('tokens.txt')) {
           tokensPath = path;
         }
@@ -57,6 +64,8 @@ class SttService {
         debugPrint('Missing model files in $dirPath. Found: encoder=$encoderPath, decoder=$decoderPath, tokens=$tokensPath');
         return false;
       }
+
+      debugPrint('Initializing Whisper with encoder: $encoderPath, decoder: $decoderPath, tokens: $tokensPath');
 
       final config = sherpa.OfflineRecognizerConfig(
         model: sherpa.OfflineModelConfig(
@@ -77,6 +86,7 @@ class SttService {
       return true;
     } catch (e, stack) {
       debugPrint('Failed to initialize STT model: $e\n$stack');
+      _recognizer?.free();
       _recognizer = null;
       _loadedModelId = null;
       return false;
@@ -84,6 +94,8 @@ class SttService {
   }
 
   Future<String> transcribeWavFile(String wavPath) async {
+    await sherpa.initBindingsAsync();
+
     if (_recognizer == null) {
       throw Exception('Whisper model is not initialized. Please select or download a model first.');
     }

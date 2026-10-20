@@ -108,6 +108,29 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     accuracyRating: 'Good',
   ),
 
+  SpeechModelInfo(
+    id: 'stt_whisper_small_en',
+    name: 'Whisper Small (English)',
+    description: 'High accuracy with advanced nuance and punctuation. Recommended for clear, detailed notes.',
+    type: SpeechModelType.stt,
+    sizeBytes: 150 * 1024 * 1024,
+    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.en.tar.bz2',
+    relativeDirPath: 'stt_whisper_small_en',
+    speedRating: '🚀 Balanced (0.6x)',
+    accuracyRating: 'Very High',
+  ),
+  SpeechModelInfo(
+    id: 'stt_whisper_small_multi',
+    name: 'Whisper Small (Multilingual)',
+    description: 'Very high accuracy across 99+ languages with strong multilingual understanding.',
+    type: SpeechModelType.stt,
+    sizeBytes: 244 * 1024 * 1024,
+    downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.tar.bz2',
+    relativeDirPath: 'stt_whisper_small_multi',
+    speedRating: '🚀 Balanced',
+    accuracyRating: 'Very High',
+  ),
+
   // TTS Models
   SpeechModelInfo(
     id: 'tts_system_native',
