@@ -17,59 +17,84 @@ class OverlayService {
   }
 
   Future<bool> isPermissionGranted() async {
-    return await FlutterOverlayWindow.isPermissionGranted();
+    try {
+      return await FlutterOverlayWindow.isPermissionGranted();
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool?> requestPermission() async {
-    return await FlutterOverlayWindow.requestPermission();
+    try {
+      return await FlutterOverlayWindow.requestPermission();
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> isOverlayActive() async {
-    return await FlutterOverlayWindow.isActive();
+    try {
+      return await FlutterOverlayWindow.isActive();
+    } catch (_) {
+      return false;
+    }
   }
 
-  Future<void> showOverlay() async {
+  Future<bool> showOverlay() async {
     final granted = await isPermissionGranted();
     if (!granted) {
-      final req = await requestPermission();
-      if (req != true) return;
+      return false;
     }
 
-    // Default collapsed floating bubble size (65x65)
-    await FlutterOverlayWindow.showOverlay(
-      width: 70,
-      height: 70,
-      alignment: OverlayAlignment.centerRight,
-      enableDrag: true,
-      positionGravity: PositionGravity.auto,
-      overlayTitle: 'Voice Dictation',
-      overlayContent: 'Tap to record voice and dictate anywhere',
-      flag: OverlayFlag.defaultFlag,
-    );
+    try {
+      // Default collapsed floating bubble size (70x70)
+      await FlutterOverlayWindow.showOverlay(
+        width: 70,
+        height: 70,
+        alignment: OverlayAlignment.centerRight,
+        enableDrag: true,
+        positionGravity: PositionGravity.auto,
+        overlayTitle: 'Voice Dictation',
+        overlayContent: 'Tap to record voice and dictate anywhere',
+        flag: OverlayFlag.defaultFlag,
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<void> closeOverlay() async {
-    await FlutterOverlayWindow.closeOverlay();
+    try {
+      await FlutterOverlayWindow.closeOverlay();
+    } catch (_) {}
   }
 
-  Future<void> toggleOverlay() async {
+  Future<bool> toggleOverlay() async {
     final active = await isOverlayActive();
     if (active) {
       await closeOverlay();
+      return false;
     } else {
-      await showOverlay();
+      return await showOverlay();
     }
   }
 
   static Future<void> resizeToBubble() async {
-    await FlutterOverlayWindow.resizeOverlay(70, 70, true);
+    try {
+      await FlutterOverlayWindow.resizeOverlay(70, 70, true);
+    } catch (_) {}
   }
 
   static Future<void> resizeToRecording() async {
-    await FlutterOverlayWindow.resizeOverlay(270, 75, false);
+    try {
+      await FlutterOverlayWindow.resizeOverlay(270, 75, false);
+    } catch (_) {}
   }
 
   static Future<void> resizeToResult() async {
-    await FlutterOverlayWindow.resizeOverlay(320, 180, false);
+    try {
+      await FlutterOverlayWindow.resizeOverlay(320, 180, false);
+    } catch (_) {}
   }
 }

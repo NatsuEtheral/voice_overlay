@@ -36,6 +36,11 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkOverlayStatus();
+      OverlayService.instance.isPermissionGranted().then((granted) {
+        if (granted && !_isOverlayActive) {
+          OverlayService.instance.showOverlay().then((_) => _checkOverlayStatus());
+        }
+      });
     }
   }
 
@@ -46,11 +51,52 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
 
   Future<void> _toggleOverlay(bool enable) async {
     if (enable) {
-      await OverlayService.instance.showOverlay();
+      final granted = await OverlayService.instance.isPermissionGranted();
+      if (!granted) {
+        if (!mounted) return;
+        _showPermissionDialog();
+        return;
+      }
+      final success = await OverlayService.instance.showOverlay();
+      if (!success) {
+        if (!mounted) return;
+        _showPermissionDialog();
+      }
     } else {
       await OverlayService.instance.closeOverlay();
     }
     await _checkOverlayStatus();
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.bubble_chart, color: Color(0xFF6366F1)),
+            SizedBox(width: 8),
+            Text('Overlay Permission'),
+          ],
+        ),
+        content: const Text(
+          'To show the floating voice bubble over WhatsApp, Slack, and other apps, Android requires the "Display over other apps" permission.\n\nTap "Open Settings" and toggle VoiceNotes ON.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await OverlayService.instance.requestPermission();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
