@@ -65,7 +65,9 @@ class ModelsNotifier extends StateNotifier<ModelsState> {
     for (final model in defaultModelCatalog) {
       final downloaded = await ModelDownloaderService.instance.isModelDownloaded(model);
 
-      if (model.type == SpeechModelType.stt && defaultStt == null && downloaded) {
+      if (model.id == 'stt_whisper_base_en' && downloaded) {
+        defaultStt = model.id;
+      } else if (model.type == SpeechModelType.stt && defaultStt == null && downloaded) {
         defaultStt = model.id;
       }
       if (model.type == SpeechModelType.tts && defaultTts == null && downloaded) {

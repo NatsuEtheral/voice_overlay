@@ -206,6 +206,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  flutter_overlay_window:
+    dependency: "direct main"
+    description:
+      name: flutter_overlay_window
+      sha256: "7e04e947726c44e430a2a0fdafb1ca2615d13abda3b8283d62a93594c3dd35ee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_riverpod:
     dependency: "direct main"
     description:

@@ -91,7 +91,6 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     relativeDirPath: 'stt_whisper_tiny_en',
     speedRating: '⚡ Ultra Fast (0.2x)',
     accuracyRating: 'Good',
-    isSelected: true,
   ),
   SpeechModelInfo(
     id: 'stt_whisper_base_en',
@@ -107,6 +106,7 @@ final List<SpeechModelInfo> defaultModelCatalog = [
     relativeDirPath: 'stt_whisper_base_en',
     speedRating: '🚀 Fast (0.4x)',
     accuracyRating: 'High',
+    isSelected: true,
   ),
   SpeechModelInfo(
     id: 'stt_whisper_tiny_multi',

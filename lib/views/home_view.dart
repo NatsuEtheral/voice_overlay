@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/notes_provider.dart';
 import '../../providers/models_provider.dart';
+import '../services/overlay_service.dart';
 import 'note_editor_view.dart';
 import 'model_manager_view.dart';
 import 'widgets/note_card.dart';
@@ -13,13 +14,43 @@ class HomeView extends ConsumerStatefulWidget {
   ConsumerState<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends ConsumerState<HomeView> {
+class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
+  bool _isOverlayActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkOverlayStatus();
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkOverlayStatus();
+    }
+  }
+
+  Future<void> _checkOverlayStatus() async {
+    final active = await OverlayService.instance.isOverlayActive();
+    if (mounted) setState(() => _isOverlayActive = active);
+  }
+
+  Future<void> _toggleOverlay(bool enable) async {
+    if (enable) {
+      await OverlayService.instance.showOverlay();
+    } else {
+      await OverlayService.instance.closeOverlay();
+    }
+    await _checkOverlayStatus();
   }
 
   @override
@@ -94,6 +125,71 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
             ),
           ),
+
+          // Floating Bubble Dictation Quick Control
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: _isOverlayActive
+                      ? colorScheme.primary.withValues(alpha: 0.6)
+                      : colorScheme.outlineVariant.withValues(alpha: 0.4),
+                  width: _isOverlayActive ? 1.5 : 1.0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: _isOverlayActive
+                          ? colorScheme.primaryContainer
+                          : colorScheme.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.bubble_chart,
+                      size: 20,
+                      color: _isOverlayActive
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Floating Voice Bubble',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          _isOverlayActive
+                            ? 'Active over WhatsApp, Slack, etc.'
+                            : 'Dictate anywhere without typing',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _isOverlayActive,
+                    onChanged: (val) => _toggleOverlay(val),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6.0),
 
           // Tags Filter Carousel
           if (allTags.isNotEmpty)

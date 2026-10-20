@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/audio_recorder_service.dart';
+import '../services/clean_speech_service.dart';
 import '../services/stt_service.dart';
 import 'models_provider.dart';
 
@@ -119,7 +120,8 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
         }
       }
 
-      final text = await SttService.instance.transcribeWavFile(path);
+      final rawText = await SttService.instance.transcribeWavFile(path);
+      final text = CleanSpeechService.instance.clean(rawText);
 
       state = state.copyWith(
         status: RecordingStatus.success,

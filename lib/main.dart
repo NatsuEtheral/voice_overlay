@@ -5,10 +5,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
+import 'services/overlay_service.dart';
 import 'views/home_view.dart';
+import 'views/overlay_view.dart';
+
+/// Entry point for the native floating overlay window
+@pragma("vm:entry-point")
+void overlayMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await sherpa.initBindingsAsync();
+  } catch (e) {
+    debugPrint('Overlay sherpa-onnx init error: $e');
+  }
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: VoiceOverlayWidget(),
+  ));
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Quick Settings Tile listener
+  OverlayService.instance.initTileListener();
 
   // Initialize sherpa-onnx native bindings for offline STT/TTS
   try {
