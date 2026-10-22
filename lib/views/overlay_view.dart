@@ -42,6 +42,8 @@ class _VoiceOverlayWidgetState extends State<VoiceOverlayWidget> {
   }
 
   Future<void> _startRecording() async {
+    debugPrint('VoiceOverlayWidget: _startRecording called');
+    HapticFeedback.lightImpact();
     _autoCollapseTimer?.cancel();
     setState(() {
       _state = _OverlayUiState.recording;
@@ -191,10 +193,11 @@ class _VoiceOverlayWidgetState extends State<VoiceOverlayWidget> {
   /// State 1: Collapsed Draggable Bubble (64x64)
   Widget _buildBubble() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: _startRecording,
       child: Container(
-        width: 60,
-        height: 60,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           color: const Color(0xFF1E222D),
           shape: BoxShape.circle,

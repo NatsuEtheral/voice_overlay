@@ -60,7 +60,12 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
       final success = await OverlayService.instance.showOverlay();
       if (!success) {
         if (!mounted) return;
-        _showPermissionDialog();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not start floating bubble. Please check app permissions.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } else {
       await OverlayService.instance.closeOverlay();
@@ -175,63 +180,70 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
           // Floating Bubble Dictation Quick Control
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(16.0),
-                border: Border.all(
-                  color: _isOverlayActive
-                      ? colorScheme.primary.withValues(alpha: 0.6)
-                      : colorScheme.outlineVariant.withValues(alpha: 0.4),
-                  width: _isOverlayActive ? 1.5 : 1.0,
+            child: Material(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(16.0),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _toggleOverlay(!_isOverlayActive),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: Border.all(
+                      color: _isOverlayActive
+                          ? colorScheme.primary.withValues(alpha: 0.6)
+                          : colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      width: _isOverlayActive ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: _isOverlayActive
+                              ? colorScheme.primaryContainer
+                              : colorScheme.surfaceContainerHighest,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.bubble_chart,
+                          size: 20,
+                          color: _isOverlayActive
+                              ? colorScheme.onPrimaryContainer
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Floating Voice Bubble',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              _isOverlayActive
+                                ? 'Active over WhatsApp, Slack, etc.'
+                                : 'Tap to dictate anywhere without typing',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: _isOverlayActive,
+                        onChanged: (val) => _toggleOverlay(val),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: _isOverlayActive
-                          ? colorScheme.primaryContainer
-                          : colorScheme.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.bubble_chart,
-                      size: 20,
-                      color: _isOverlayActive
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 12.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Floating Voice Bubble',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _isOverlayActive
-                            ? 'Active over WhatsApp, Slack, etc.'
-                            : 'Dictate anywhere without typing',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: _isOverlayActive,
-                    onChanged: (val) => _toggleOverlay(val),
-                  ),
-                ],
               ),
             ),
           ),
