@@ -194,26 +194,31 @@ class _VoiceOverlayWidgetState extends State<VoiceOverlayWidget> {
   Widget _buildBubble() {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _startRecording,
-      child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E222D),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF6366F1), width: 2.0),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-              blurRadius: 14,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.mic,
-          color: Colors.white,
-          size: 28,
+      onTap: () {
+        debugPrint('>>> VoiceOverlayWidget: TAP ON BUBBLE! Starting recording... <<<');
+        _startRecording();
+      },
+      child: Center(
+        child: Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E222D),
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF6366F1), width: 2.0),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                blurRadius: 14,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.mic,
+            color: Colors.white,
+            size: 28,
+          ),
         ),
       ),
     );

@@ -56,12 +56,13 @@ class OverlayService {
     try {
       debugPrint('OverlayService.showOverlay: launching overlay window');
       // Pass pixel dimensions matching the collapsed floating bubble (~80dp * 3.0 density)
+      // Use PositionGravity.none so ACTION_UP taps are never interrupted by edge-snapping animations
       await FlutterOverlayWindow.showOverlay(
         width: 250,
         height: 250,
         alignment: OverlayAlignment.centerRight,
         enableDrag: true,
-        positionGravity: PositionGravity.auto,
+        positionGravity: PositionGravity.none,
         overlayTitle: 'Voice Dictation',
         overlayContent: 'Tap to record voice and dictate anywhere',
         flag: OverlayFlag.defaultFlag,

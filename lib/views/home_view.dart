@@ -50,15 +50,20 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
   }
 
   Future<void> _toggleOverlay(bool enable) async {
+    // Optimistic UI update: animate the switch immediately
+    setState(() => _isOverlayActive = enable);
+
     if (enable) {
       final granted = await OverlayService.instance.isPermissionGranted();
       if (!granted) {
+        setState(() => _isOverlayActive = false);
         if (!mounted) return;
         _showPermissionDialog();
         return;
       }
       final success = await OverlayService.instance.showOverlay();
       if (!success) {
+        setState(() => _isOverlayActive = false);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -66,9 +71,13 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
             behavior: SnackBarBehavior.floating,
           ),
         );
+        return;
       }
+      // Give the native Android service a short moment to initialize
+      await Future.delayed(const Duration(milliseconds: 300));
     } else {
       await OverlayService.instance.closeOverlay();
+      await Future.delayed(const Duration(milliseconds: 150));
     }
     await _checkOverlayStatus();
   }
@@ -237,9 +246,11 @@ class _HomeViewState extends ConsumerState<HomeView> with WidgetsBindingObserver
                           ],
                         ),
                       ),
-                      Switch(
-                        value: _isOverlayActive,
-                        onChanged: (val) => _toggleOverlay(val),
+                      IgnorePointer(
+                        child: Switch(
+                          value: _isOverlayActive,
+                          onChanged: null,
+                        ),
                       ),
                     ],
                   ),

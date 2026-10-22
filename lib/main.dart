@@ -13,6 +13,7 @@ import 'views/overlay_view.dart';
 @pragma("vm:entry-point")
 void overlayMain() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('>>> overlayMain entry point started! <<<');
   try {
     await sherpa.initBindingsAsync();
   } catch (e) {
@@ -20,7 +21,10 @@ void overlayMain() async {
   }
   runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: VoiceOverlayWidget(),
+    home: Scaffold(
+      backgroundColor: Colors.transparent,
+      body: VoiceOverlayWidget(),
+    ),
   ));
 }
 
