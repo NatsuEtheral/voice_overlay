@@ -1,39 +1,67 @@
 plugins {
     id("com.android.application")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.offlinestt.voicenotes.offline_voice_notes"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.offlinestt.voicenotes.offline_voice_notes"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0.0"
+
+        ndk {
+            abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.offlinestt.voicenotes.offline_voice_notes"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+    buildFeatures {
+        compose = true
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            pickFirsts += listOf(
+                "lib/arm64-v8a/libonnxruntime.so",
+                "lib/arm64-v8a/libsherpa-onnx-jni.so",
+                "lib/arm64-v8a/libsherpa-onnx-c-api.so",
+                "lib/arm64-v8a/libsherpa-onnx-cxx-api.so",
+                "lib/armeabi-v7a/libonnxruntime.so",
+                "lib/armeabi-v7a/libsherpa-onnx-jni.so",
+                "lib/armeabi-v7a/libsherpa-onnx-c-api.so",
+                "lib/armeabi-v7a/libsherpa-onnx-cxx-api.so",
+                "lib/x86_64/libonnxruntime.so",
+                "lib/x86_64/libsherpa-onnx-jni.so",
+                "lib/x86_64/libsherpa-onnx-c-api.so",
+                "lib/x86_64/libsherpa-onnx-cxx-api.so",
+                "lib/x86/libonnxruntime.so",
+                "lib/x86/libsherpa-onnx-jni.so",
+                "lib/x86/libsherpa-onnx-c-api.so",
+                "lib/x86/libsherpa-onnx-cxx-api.so"
+            )
         }
     }
 }
@@ -44,6 +72,32 @@ kotlin {
     }
 }
 
-flutter {
-    source = "../.."
+dependencies {
+    // Core AndroidX
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.activity:activity-compose:1.9.3")
+
+    // Jetpack Compose & Material 3
+    val composeBom = platform("androidx.compose:compose-bom:2024.10.00")
+    implementation(composeBom)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // DataStore (Preferences)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // OkHttp (Streaming Model Downloads)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Unit tests
+    testImplementation("junit:junit:4.13.2")
 }
