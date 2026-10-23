@@ -1,9 +1,10 @@
 # Current Status: Migration to Native Android (Kotlin)
 
-**Timestamp:** 2026-10-22 08:07 IST  
+**Timestamp:** 2026-10-23 08:05 IST  
 **Active Branch:** `migrate_to_kotlin`  
 **Repository:** `https://github.com/NatsuEtheral/voice_overlay.git`  
 **Target Device:** OnePlus Nord CE4 (`CPH2691`), Snapdragon 7 Gen 3, Android 14/15  
+**Generated APK:** `~/Downloads/voice-overlay.apk` (139 MB)  
 
 ---
 
@@ -88,34 +89,30 @@ android/app/src/main/
 
 ---
 
-## 4. Work Completed in Last Session
-1. **Sherpa ONNX JNI Integration:** Downloaded and extracted official release `v1.13.8` JNI binaries for all Android ABIs.
+## 4. Work Completed
+1. **Sherpa ONNX JNI Integration:** Downloaded and extracted official release `v1.13.8` JNI binaries for all Android ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`).
 2. **Missing Reference Fixes:**
    - Added `QnnConfig.kt` to resolve unresolved references in `OfflineRecognizer.kt`.
    - Updated `SherpaOnnxManager.kt` constructor call for `OfflineRecognizer(assetManager = null, config = recognizerConfig)`.
    - Fixed `R` resource resolution in `FloatingOverlayView.kt`.
    - Added `CircleShape` import in `ModelManagerScreen.kt`.
+3. **Legacy Flutter Cleanup:** Removed `GeneratedPluginRegistrant.java` from `src/main/java`.
+4. **Native Build & Assembly:** Successful build via `./gradlew assembleDebug` with 0 compilation errors.
+5. **APK Generated & Placed:** Copied debug APK to `~/Downloads/voice-overlay.apk` (139 MB).
+6. **Git Synchronized:** Committed and pushed to remote branch `migrate_to_kotlin` (`16b700f`).
 
 ---
 
-## 5. Next Steps When Resuming
-1. **Run Native Build:**
-   ```bash
-   cd android
-   ./gradlew assembleDebug
-   ```
-2. **Commit & Push:**
-   ```bash
-   git add .
-   git commit -m "feat: complete migration to pure native Kotlin with Compose, WindowManager overlay, and Sherpa-ONNX"
-   git push origin migrate_to_kotlin
-   ```
-3. **Install on Device & Verify:**
-   ```bash
-   ./gradlew installDebug
-   ```
-   - Verify Home screen and 120Hz smoothness.
-   - Tap "Floating Voice Bubble" card to start `VoiceOverlayService`.
-   - Tap the floating purple orb on screen $\rightarrow$ instantly expands to recording pill.
-   - Speak audio $\rightarrow$ tap Stop $\rightarrow$ verify on-device transcription and clipboard auto-copy.
-   - Test Quick Settings tile toggle.
+## 5. Testing on Phone
+You can install `~/Downloads/voice-overlay.apk` directly on your OnePlus Nord CE4:
+- Transfer `voice-overlay.apk` to your phone or install via ADB:
+  ```bash
+  adb install -r ~/Downloads/voice-overlay.apk
+  ```
+- **What to verify:**
+  1. **Home Screen:** High refresh rate (120Hz) smoothness, notes list, model status.
+  2. **Model Download:** Go to Models $\rightarrow$ Whisper Base English (74MB) default download from Cloudflare CDN.
+  3. **Floating Overlay Activation:** Tap the Floating Voice Bubble card $\rightarrow$ grant `Display over other apps` permission $\rightarrow$ purple floating bubble appears.
+  4. **Instant Touch Response:** Tap the floating orb $\rightarrow$ expands immediately into recording pill with live waveform (no ignored touches or `ACTION_CANCEL` bugs!).
+  5. **Dictation & Auto-Copy:** Speak $\rightarrow$ tap Stop $\rightarrow$ clean transcribed text appears and automatically copies to clipboard for instant pasting anywhere.
+  6. **Quick Settings Tile:** Add and test the Voice Overlay tile in the notification drawer.
