@@ -58,13 +58,20 @@ class ModelDownloadManager private constructor(private val context: Context) {
         val dir = getModelDirectory(model)
         if (!dir.exists() || !dir.isDirectory) return false
 
-        // Check if all files in fileUrls exist and are non-empty
+        val completeMarker = File(dir, ".complete")
+        if (completeMarker.exists()) return true
+
+        // Fallback for previously downloaded models: verify all expected files exist with reasonable size
         return if (model.fileUrls.isNotEmpty()) {
-            model.fileUrls.all { url ->
+            val allPresent = model.fileUrls.all { url ->
                 val fileName = url.substringAfterLast('/')
                 val file = File(dir, fileName)
-                file.exists() && file.length() > 1024
+                file.exists() && file.length() > 50_000
             }
+            if (allPresent) {
+                try { completeMarker.createNewFile() } catch (_: Exception) {}
+            }
+            allPresent
         } else {
             dir.listFiles()?.isNotEmpty() == true
         }
@@ -104,6 +111,8 @@ class ModelDownloadManager private constructor(private val context: Context) {
                     completedFiles++
                 }
 
+                try { File(targetDir, ".complete").createNewFile() } catch (_: Exception) {}
+
                 updateModelState(model.id, isDownloading = false, isDownloaded = true, progress = 1.0f)
                 refreshDownloadStatus()
                 withContext(Dispatchers.Main) { onComplete?.invoke(true) }
@@ -116,6 +125,7 @@ class ModelDownloadManager private constructor(private val context: Context) {
     }
 
     private fun downloadFile(url: String, destination: File, onProgress: (Float) -> Unit) {
+        val tempFile = File(destination.parentFile, "${destination.name}.tmp")
         val request = Request.Builder().url(url).build()
         val response = client.newCall(request).execute()
 
@@ -126,10 +136,10 @@ class ModelDownloadManager private constructor(private val context: Context) {
         val body = response.body ?: throw Exception("Empty response body from $url")
         val contentLength = body.contentLength()
         val inputStream = body.byteStream()
-        val outputStream = FileOutputStream(destination)
+        val outputStream = FileOutputStream(tempFile)
 
         var totalBytesRead = 0L
-        val buffer = ByteArray(8 * 1024)
+        val buffer = ByteArray(32 * 1024)
         var bytesRead: Int
 
         outputStream.use { out ->
@@ -142,6 +152,19 @@ class ModelDownloadManager private constructor(private val context: Context) {
                     }
                 }
             }
+        }
+
+        if (contentLength > 0 && totalBytesRead < contentLength) {
+            tempFile.delete()
+            throw Exception("Incomplete download: received $totalBytesRead of $contentLength bytes")
+        }
+
+        if (destination.exists()) {
+            destination.delete()
+        }
+        if (!tempFile.renameTo(destination)) {
+            tempFile.copyTo(destination, overwrite = true)
+            tempFile.delete()
         }
     }
 

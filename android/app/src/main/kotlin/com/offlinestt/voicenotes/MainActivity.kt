@@ -18,6 +18,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.offlinestt.voicenotes.data.ModelDownloadManager
 import com.offlinestt.voicenotes.data.UserPreferences
 import com.offlinestt.voicenotes.models.SpeechModelType
@@ -158,15 +161,19 @@ class MainActivity : ComponentActivity() {
         val userPrefs = UserPreferences.getInstance(this)
         val defaultModel = defaultModelCatalog.firstOrNull { it.id == "stt_whisper_base_en" } ?: return
 
-        if (!downloadManager.isModelDownloaded(defaultModel)) {
-            downloadManager.downloadModel(defaultModel) { success ->
-                if (success) {
-                    SherpaOnnxManager.getInstance(this).initModel(defaultModel)
-                    userPrefs.setActiveSttModelId(defaultModel.id)
+        CoroutineScope(Dispatchers.IO).launch {
+            if (!downloadManager.isModelDownloaded(defaultModel)) {
+                downloadManager.downloadModel(defaultModel) { success ->
+                    if (success) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            SherpaOnnxManager.getInstance(this@MainActivity).initModel(defaultModel)
+                            userPrefs.setActiveSttModelId(defaultModel.id)
+                        }
+                    }
                 }
+            } else {
+                SherpaOnnxManager.getInstance(this@MainActivity).initModel(defaultModel)
             }
-        } else {
-            SherpaOnnxManager.getInstance(this).initModel(defaultModel)
         }
     }
 }

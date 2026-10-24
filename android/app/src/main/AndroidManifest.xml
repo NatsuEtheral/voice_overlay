@@ -16,7 +16,7 @@
         android:hardwareAccelerated="true">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.offlinestt.voicenotes.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -29,7 +29,7 @@
 
         <!-- Quick Settings Tile for Voice Dictation -->
         <service
-            android:name=".VoiceTileService"
+            android:name="com.offlinestt.voicenotes.VoiceTileService"
             android:exported="true"
             android:label="Voice Dictation"
             android:icon="@mipmap/ic_launcher"
@@ -41,7 +41,7 @@
 
         <!-- Native Floating WindowManager Overlay Service -->
         <service
-            android:name=".overlay.VoiceOverlayService"
+            android:name="com.offlinestt.voicenotes.overlay.VoiceOverlayService"
             android:exported="false"
             android:foregroundServiceType="specialUse|microphone">
             <property

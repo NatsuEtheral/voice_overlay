@@ -1,10 +1,10 @@
 # Current Status: Migration to Native Android (Kotlin)
 
-**Timestamp:** 2026-10-23 08:05 IST  
+**Timestamp:** 2026-10-24 07:33 IST  
 **Active Branch:** `migrate_to_kotlin`  
 **Repository:** `https://github.com/NatsuEtheral/voice_overlay.git`  
 **Target Device:** OnePlus Nord CE4 (`CPH2691`), Snapdragon 7 Gen 3, Android 14/15  
-**Generated APK:** `~/Downloads/voice-overlay.apk` (139 MB)  
+**Generated APK:** `~/Downloads/voice-overlay.apk` (139 MB) — Installed & Running (PID: 18769)  
 
 ---
 
@@ -116,3 +116,15 @@ You can install `~/Downloads/voice-overlay.apk` directly on your OnePlus Nord CE
   4. **Instant Touch Response:** Tap the floating orb $\rightarrow$ expands immediately into recording pill with live waveform (no ignored touches or `ACTION_CANCEL` bugs!).
   5. **Dictation & Auto-Copy:** Speak $\rightarrow$ tap Stop $\rightarrow$ clean transcribed text appears and automatically copies to clipboard for instant pasting anywhere.
   6. **Quick Settings Tile:** Add and test the Voice Overlay tile in the notification drawer.
+
+---
+
+## 6. Startup Crash Fix (October 24, 2026)
+- **Problem 1:** In `AndroidManifest.xml`, relative class paths like `.MainActivity` were resolving to `com.offlinestt.voicenotes.offline_voice_notes.MainActivity` (due to the `namespace` configuration in `build.gradle.kts`), leading to `ClassNotFoundException: Didn't find class ... MainActivity`.
+  - **Resolution:** Updated all components (`MainActivity`, `VoiceTileService`, `VoiceOverlayService`) to use fully qualified class names.
+- **Problem 2:** A partially downloaded / corrupted `base.en-decoder.int8.onnx` file (~33 MB instead of ~130 MB) caused an unhandled C++ `Ort::Exception: Protobuf parsing failed` during synchronous `onCreate` initialization.
+  - **Resolution:**
+    1. Implemented atomic file downloads in `ModelDownloadManager` (`.tmp` files with byte length validation before renaming).
+    2. Added `.complete` marker file tracking.
+    3. Moved Sherpa ONNX model loading to background `Dispatchers.IO` thread in `MainActivity`.
+- **Status:** App builds cleanly, installs, and runs smoothly with Whisper Base loaded successfully.
