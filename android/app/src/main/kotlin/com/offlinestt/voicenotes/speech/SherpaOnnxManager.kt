@@ -140,10 +140,14 @@ class SherpaOnnxManager private constructor(private val context: Context) {
             }
 
             val stream = rec.createStream()
-            stream.acceptWaveform(waveData.samples, waveData.sampleRate)
-            rec.decode(stream)
-            val result = rec.getResult(stream)
-            return@withContext result.text.trim()
+            try {
+                stream.acceptWaveform(waveData.samples, waveData.sampleRate)
+                rec.decode(stream)
+                val result = rec.getResult(stream)
+                return@withContext result.text.trim()
+            } finally {
+                stream.release()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Transcription failed: ${e.message}", e)
             return@withContext "Transcription error: ${e.message}"

@@ -2,16 +2,16 @@ package com.k2fsa.sherpa.onnx
 
 import android.content.res.AssetManager
 
-data class OfflineRecognizerResult(
+data class OfflineRecognizerResult @JvmOverloads constructor(
     val text: String,
     val tokens: Array<String>,
     val timestamps: FloatArray,
-    val lang: String,
-    val emotion: String,
-    val event: String,
+    val lang: String = "",
+    val emotion: String = "",
+    val event: String = "",
 
     // valid only for TDT models
-    val durations: FloatArray,
+    val durations: FloatArray = FloatArray(0),
 
     // The decoded word IDs. Empty for greedy search decoding, non-empty when
     // an HLG graph is used, i.e. when ctcFstDecoderConfig.graph is set.
