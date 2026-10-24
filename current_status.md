@@ -127,4 +127,6 @@ You can install `~/Downloads/voice-overlay.apk` directly on your OnePlus Nord CE
     1. Implemented atomic file downloads in `ModelDownloadManager` (`.tmp` files with byte length validation before renaming).
     2. Added `.complete` marker file tracking.
     3. Moved Sherpa ONNX model loading to background `Dispatchers.IO` thread in `MainActivity`.
-- **Status:** App builds cleanly, installs, and runs smoothly with Whisper Base loaded successfully.
+- **Problem 3 (Stop Recording Crash):** When tapping Stop / Done, JNI called `OfflineRecognizer.getResult()`. The native C++ library (`libsherpa-onnx-jni.so`) looked up `OfflineRecognizerResult` with a 7-parameter constructor: `(String, String[], float[], String, String, String, float[])`. Because `OfflineRecognizerResult` had an 8th parameter (`words: IntArray = IntArray(0)`) without `@JvmOverloads`, JNI threw `NoSuchMethodError` and aborted.
+  - **Resolution:** Added `@JvmOverloads` to `OfflineRecognizerResult`, generating the exact 7-parameter JVM constructor required by Sherpa ONNX JNI. Also added proper `.release()` cleanup for native `OfflineStream` instances.
+- **Status:** App builds, installs, runs, and transcribes voice recordings without crashing.
